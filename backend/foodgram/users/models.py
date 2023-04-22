@@ -42,13 +42,15 @@ class User(AbstractUser):
         null=True,
     )
     email = models.EmailField(max_length=254, unique=True)
-    first_name = models.CharField(max_length=150,)
-    last_name = models.CharField(max_length=150,)
+    first_name = models.CharField(max_length=150, verbose_name='Имя')
+    last_name = models.CharField(max_length=150, verbose_name='Фамилия')
     REQUIRED_FIELDS = []
 
     objects = UserManager()
 
     class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
         ordering = ['id']
 
     def __str__(self):

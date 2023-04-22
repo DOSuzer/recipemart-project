@@ -23,17 +23,3 @@ class UserDetailSerializer(BaseUserSerializer):
     class Meta(BaseUserSerializer.Meta):
         fields = ('email', 'id', 'username',
                   'first_name', 'last_name', 'is_subscribed', )
-
-
-class CurrentUserDetailSerializer(BaseUserSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
-    def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
-            user=self.context['request'].user,
-            following=obj.id
-        ).exists()
-
-    class Meta(BaseUserSerializer.Meta):
-        fields = ('email', 'id', 'username',
-                  'first_name', 'last_name', 'is_subscribed', )

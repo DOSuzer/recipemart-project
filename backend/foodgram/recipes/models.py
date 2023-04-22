@@ -37,7 +37,7 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments',
+        related_name='recipes',
         verbose_name='Автор',
     )
     ingredients = models.ManyToManyField(
@@ -79,7 +79,7 @@ class RecipeTags(models.Model):
 
 class RecipeIngredients(models.Model):
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE
+        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients',
     )
     amount = models.DecimalField(
         max_digits=10,
