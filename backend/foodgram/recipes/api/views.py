@@ -24,9 +24,15 @@ class TagViewSet(mixins.ListModelMixin,
 class IngredientViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         viewsets.GenericViewSet):
-    queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = (permissions.AllowAny, )
+
+    def get_queryset(self):
+        queryset = Ingredient.objects.all()
+        name = self.request.query_params.get('name')
+        if name is not None:
+            queryset = queryset.filter(name=name)
+        return queryset
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -46,7 +52,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
 class FavoriteViewSet(mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
-    permission_classes = (permissions.IsAuthenticated, )
 
     @action(detail=False,
             methods=['post', 'delete'],
@@ -55,6 +60,11 @@ class FavoriteViewSet(mixins.CreateModelMixin,
         user = get_object_or_404(User, pk=self.request.user.id)
         recipe = get_object_or_404(Recipe, pk=recipe_id)
         if self.request.method == 'POST':
+            if Favorite.objects.filter(user=user, recipe=recipe).exists():
+                return Response(
+                    {"errors": "Уже добавлено в избранное"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             Favorite.objects.create(user=user, recipe=recipe)
             serializer = ShortRecipeSerializer(recipe)
             return Response(data=serializer.data,
@@ -67,23 +77,35 @@ class FavoriteViewSet(mixins.CreateModelMixin,
 class SubscriptionsView(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
     pagination_class = PageNumberPagination
-    permission_classes = (permissions.IsAuthenticated, )
     serializer_class = FollowSerializer
 
     def get_queryset(self):
         user = get_object_or_404(User, pk=self.request.user.id)
-        return user.follower.all()
+        queryset = user.follower.all()
+        recipes_limit = self.request.query_params.get('recipes_limit')
+        if recipes_limit is not None:
+            queryset = queryset[0:recipes_limit]
+        return queryset
 
 
 class SubscribeView(mixins.CreateModelMixin,
                     mixins.DestroyModelMixin,
                     viewsets.GenericViewSet):
-    permission_classes = (permissions.IsAuthenticated, )
     serializer_class = FollowSerializer
 
     def create(self, request, user_id):
         user = get_object_or_404(User, pk=self.request.user.id)
         following = get_object_or_404(User, pk=user_id)
+        if user == following:
+                return Response(
+                    {"errors": "Нельзя подписаться на себя!"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        if Follow.objects.filter(user=user, following=following).exists():
+                return Response(
+                    {"errors": "Уже подписан, угомонись!"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         serializer = FollowSerializer(Follow.objects.create(
                                       user=user, following=following))
         return Response(
@@ -139,6 +161,11 @@ class ShoppingListViewSet(mixins.RetrieveModelMixin,
         user = get_object_or_404(User, pk=self.request.user.id)
         recipe = get_object_or_404(Recipe, pk=recipe_id)
         if self.request.method == 'POST':
+            if Shoplist.objects.filter(user=user, recipe=recipe).exists():
+                return Response(
+                    {"errors": "Уже добавлено в список покупок"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             Shoplist.objects.create(user=user, recipe=recipe)
             serializer = ShortRecipeSerializer(recipe)
             return Response(data=serializer.data,

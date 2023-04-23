@@ -6,10 +6,10 @@ from users.models import User
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=50,
-                            unique=True,
+    name = models.CharField(max_length=100,
+                            db_index=True,
                             verbose_name='Название',)
-    measurement_unit = models.CharField(max_length=20,
+    measurement_unit = models.CharField(max_length=50,
                                         verbose_name='Единица измерения',)
 
     class Meta:
@@ -84,7 +84,7 @@ class RecipeIngredients(models.Model):
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.001'))]
+        validators=[MinValueValidator(Decimal('0.01'))]
     )
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
