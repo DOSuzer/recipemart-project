@@ -141,11 +141,17 @@ class FollowSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(read_only=True,
                                       source='following.last_name')
     is_subscribed = serializers.BooleanField(default=True)
-    recipes = ShortRecipeSerializer(
-        source='following.recipes',
-        many=True,
-    )
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
+
+    def get_recipes(self, obj):
+        try:
+            recipes_limit = (self.context['request'].
+                             query_params.get('recipes_limit'))
+            recipes = obj.following.recipes.all()[:int(recipes_limit)]
+        except KeyError:
+            recipes = obj.following.recipes.all()
+        return ShortRecipeSerializer(recipes, many=True).data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(
