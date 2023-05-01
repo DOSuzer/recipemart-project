@@ -40,7 +40,7 @@ class RecipeIngredientSerializer(serializers.HyperlinkedModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, )
     author = UserDetailSerializer(read_only=True, )
-    ingredients = RecipeIngredientSerializer(source='RecipeIngredient_set',
+    ingredients = RecipeIngredientSerializer(source='RecipeIngredients_set',
                                              many=True, )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
