@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -21,9 +22,12 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    color = models.CharField(max_length=50, unique=True)
-    slug = models.SlugField(max_length=50, unique=True)
+    name = models.CharField(max_length=50, unique=True,
+                            verbose_name='Название')
+    color = models.CharField(max_length=50, unique=True,
+                             verbose_name='Цвет')
+    slug = models.SlugField(max_length=50, unique=True,
+                            verbose_name='Слаг')
 
     class Meta:
         verbose_name = 'Тэг'
@@ -42,13 +46,13 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        through='RecipeIngredients',
+        through='RecipeIngredient',
         verbose_name='Ингредиенты',
     )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тэг',
-        through='RecipeTags',
+        through='RecipeTag',
     )
     image = models.ImageField(
         upload_to='recipes/', null=True, blank=True, verbose_name='Картинка')
@@ -72,21 +76,40 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeTags(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+class RecipeTag(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               verbose_name='Рецепт')
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE,
+                            verbose_name='Тэг')
+
+    class Meta:
+        verbose_name = 'Тэг рецепта'
+        verbose_name_plural = 'Тэги рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'tag'],
+                name='unique_recipe_tag'
+            )
+        ]
 
 
-class RecipeIngredients(models.Model):
+class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
-        Ingredient, on_delete=models.CASCADE, related_name='recipeingredients',
+        Ingredient, on_delete=models.CASCADE,
+        related_name='recipeingredients',
+        verbose_name='Ингредиент'
     )
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))]
+        validators=[MinValueValidator(Decimal('0.01'))],
+        verbose_name='Количество'
     )
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
 
 
 class UserRecipe(models.Model):
@@ -161,5 +184,5 @@ class Follow(models.Model):
             )
         ]
 
-    def __str__(self) -> str:
+    def __str__(self):
         return (f'{self.user.username} подписан на {self.following.username}')

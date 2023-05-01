@@ -1,22 +1,9 @@
-import base64
-
-from django.core.files.base import ContentFile
 from rest_framework import serializers
+
+from core.fields import Base64ImageField
 from users.api.serializers import UserDetailSerializer
-
-from ..models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredients,
-                      RecipeTags, Shoplist, Tag)
-
-
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
+from ..models import (Favorite, Follow, Ingredient, Recipe, RecipeIngredient,
+                      RecipeTag, Shoplist, Tag)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -33,7 +20,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
 
 
-class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):
+class RecipeIngredientSerializer(serializers.HyperlinkedModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         source='ingredient.id',
         queryset=Ingredient.objects.all()
@@ -47,14 +34,14 @@ class RecipeIngredientsSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         fields = ('id', 'name', 'measurement_unit', 'amount')
-        model = RecipeIngredients
+        model = RecipeIngredient
 
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, )
     author = UserDetailSerializer(read_only=True, )
-    ingredients = RecipeIngredientsSerializer(source='recipeingredients_set',
-                                              many=True, )
+    ingredients = RecipeIngredientSerializer(source='RecipeIngredient_set',
+                                             many=True, )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -80,8 +67,8 @@ class RecipeSerializer(serializers.ModelSerializer):
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
-    ingredients = RecipeIngredientsSerializer(source='recipeingredients_set',
-                                              many=True, )
+    ingredients = RecipeIngredientSerializer(source='RecipeIngredient_set',
+                                             many=True, )
     image = Base64ImageField()
 
     class Meta:
@@ -99,26 +86,42 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create_ingredients(self, ingredients, instance):
-        for ingredient in ingredients:
-            current_ingredient = ingredient['ingredient']['id']
-            RecipeIngredients.objects.create(ingredient=current_ingredient,
-                                             recipe=instance,
-                                             amount=ingredient['amount'])
+        objs = [
+            RecipeIngredient(
+                ingredient=ingredient['ingredient']['id'],
+                recipe=instance,
+                amount=ingredient['amount']
+            )
+            for ingredient in ingredients
+        ]
+        RecipeIngredient.objects.bulk_create(objs)
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('RecipeIngredient_set')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         self.create_ingredients(ingredients, recipe)
         for tag in tags:
-            RecipeTags.objects.create(tag=tag, recipe=recipe)
+            RecipeTag.objects.create(tag=tag, recipe=recipe)
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('recipeingredients_set')
-        RecipeIngredients.objects.filter(recipe=instance).delete()
+        ingredients = validated_data.pop('RecipeIngredient_set')
+        RecipeIngredient.objects.filter(recipe=instance).delete()
         self.create_ingredients(ingredients, instance)
         return super().update(instance, validated_data)
+
+    def validate(self, data):
+        ingredients = data.get('RecipeIngredient_set')
+        temp_list = []
+        for ingredient in ingredients:
+            if ingredient['ingredient']['id'] in temp_list:
+                raise serializers.ValidationError(
+                    'Обнаружен дубликат ингредиента: {}!'
+                    .format(ingredient['ingredient']['id'])
+                )
+            temp_list.append(ingredient['ingredient']['id'])
+        return data
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
