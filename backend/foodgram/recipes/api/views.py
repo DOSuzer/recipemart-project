@@ -89,10 +89,10 @@ class RecipesViewSet(viewsets.ModelViewSet):
             .values(
                 name=F('recipe__ingredients__name'),
                 unit=F(
-                    'recipe__recipeingredients__ingredient__measurement_unit'
+                    'recipe__recipeingredient__ingredient__measurement_unit'
                 )
             )
-            .annotate(amount=Sum('recipe__recipeingredients__amount'))
+            .annotate(amount=Sum('recipe__recipeingredient__amount'))
             .order_by('recipe__ingredients__name')
         )
         buffer = io.BytesIO()
