@@ -40,7 +40,7 @@ class RecipeIngredientSerializer(serializers.HyperlinkedModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, )
     author = UserDetailSerializer(read_only=True, )
-    ingredients = RecipeIngredientSerializer(source='recipeingredients_set',
+    ingredients = RecipeIngredientSerializer(source='recipeingredient_set',
                                              many=True, )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
@@ -67,7 +67,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
-    ingredients = RecipeIngredientSerializer(source='recipeingredients_set',
+    ingredients = RecipeIngredientSerializer(source='recipeingredient_set',
                                              many=True, )
     image = Base64ImageField()
 
@@ -97,7 +97,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         RecipeIngredient.objects.bulk_create(objs)
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredient_set')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         self.create_ingredients(ingredients, recipe)
@@ -106,13 +106,13 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredient_set')
         RecipeIngredient.objects.filter(recipe=instance).delete()
         self.create_ingredients(ingredients, instance)
         return super().update(instance, validated_data)
 
     def validate(self, data):
-        ingredients = data.get('recipeingredients_set')
+        ingredients = data.get('recipeingredient_set')
         temp_list = []
         for ingredient in ingredients:
             if ingredient['ingredient']['id'] in temp_list:

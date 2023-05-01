@@ -9,7 +9,7 @@ load_dotenv(os.path.join(BASE_DIR.parent.parent, 'infra/.env'))
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
