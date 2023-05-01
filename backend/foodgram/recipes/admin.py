@@ -29,10 +29,6 @@ class RecipeAdmin(admin.ModelAdmin):
         return Favorite.objects.filter(recipe=obj.pk).count()
     favorite_count.short_description = "Добавлений в избранное"
 
-    def get_form(self, request, obj=None, change=False, **kwargs):
-        form = super().get_form(request, obj, change, **kwargs)
-        return form
-
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):

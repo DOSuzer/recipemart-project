@@ -1,8 +1,7 @@
 import os
 
-from pathlib import Path
 from dotenv import load_dotenv
-
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,7 +9,7 @@ load_dotenv(os.path.join(BASE_DIR.parent.parent, 'infra/.env'))
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -67,8 +66,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': '',
-#        'HOST': os.getenv('DB_HOST'),
+        'HOST': os.getenv('DB_HOST'),
         'PORT': os.getenv('DB_PORT')
     }
 }
