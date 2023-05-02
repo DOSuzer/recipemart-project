@@ -105,11 +105,18 @@ class RecipeIngredient(models.Model):
         validators=[MinValueValidator(Decimal('0.01'))],
         verbose_name='Количество'
     )
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               verbose_name='Рецепт')
 
     class Meta:
         verbose_name = 'Ингредиент рецепта'
         verbose_name_plural = 'Ингредиенты рецептов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredient_recipe'
+            )
+        ]
 
 
 class UserRecipe(models.Model):
