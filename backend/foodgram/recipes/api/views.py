@@ -109,6 +109,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
             p.drawString(400, y, str(item['amount']))
             p.drawString(500, y, item['unit'])
             y -= 20
+            if y < 100:
+                p.showPage()
         p.showPage()
         p.save()
         buffer.seek(0)
