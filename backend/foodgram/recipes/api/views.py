@@ -111,6 +111,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             y -= 20
             if y < 100:
                 p.showPage()
+                y = 700
         p.showPage()
         p.save()
         buffer.seek(0)
