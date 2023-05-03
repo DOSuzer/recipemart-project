@@ -1,10 +1,5 @@
 ![example workflow](https://github.com/dosuzer/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
 
-Сервер: 158.160.30.120 / uzer.webhop.me (без HTTPS)
-
-Админка: sh@ya.ru
-Пароль:  slanara33
-
 ## Проект Foodgram
 Foodgram - продуктовый помощник с базой кулинарных рецептов. Позволяет публиковать рецепты, подписываться на любимых авторов, сохранять рецепты в избранные, формировать список покупок для выбранных рецептов.
 Документация по API доступна по адресу 158.160.30.120/api/docs/
