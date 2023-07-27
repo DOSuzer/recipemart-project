@@ -1,7 +1,7 @@
-![example workflow](https://github.com/dosuzer/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg)
+![example workflow](https://github.com/dosuzer/recipemart-project/actions/workflows/foodgram-project-react.yml/badge.svg)
 
-## Проект Foodgram
-Foodgram - продуктовый помощник с базой кулинарных рецептов. Позволяет публиковать рецепты, подписываться на любимых авторов, сохранять рецепты в избранные, формировать список покупок для выбранных рецептов.
+## Проект RecipeMart
+RecipeMart - база кулинарных рецептов. Позволяет публиковать рецепты, подписываться на любимых авторов, сохранять рецепты в избранные, формировать список покупок для выбранных рецептов.
 Документация по API доступна по адресу 158.160.30.120/api/docs/
 
 ### Технологии:
