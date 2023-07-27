@@ -2,7 +2,7 @@
 
 ## Проект RecipeMart
 RecipeMart - база кулинарных рецептов. Позволяет публиковать рецепты, подписываться на любимых авторов, сохранять рецепты в избранные, формировать список покупок для выбранных рецептов.
-Документация по API доступна по адресу 158.160.30.120/api/docs/
+Документация по API доступна по адресу /api/docs/
 
 ### Технологии:
 Python, Django, DRF, Docker, Gunicorn, Nginx, PostgreSQL, Yandex Cloud, CI-CD
@@ -11,7 +11,7 @@ Python, Django, DRF, Docker, Gunicorn, Nginx, PostgreSQL, Yandex Cloud, CI-CD
 
 - Клонировать репозиторий:
 ```
-https://github.com/DOSuzer/foodgram-project-react.git
+https://github.com/DOSuzer/recipemart-project.git
 ```
 
 - Установить на сервере Docker, Docker Compose:
